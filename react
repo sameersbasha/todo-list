@@ -1,0 +1,79 @@
+import React, { useState } from "react";
+import { useAuth0 } from "@auth0/react";
+import { useDispatch, useSelector } from "react-redux";
+import { addToDoList, editToDoList, deleteToDoList, addTask, editTask, deleteTask } from "./redux/actions";
+
+const App = () => {
+  const { isAuthenticated } = useAuth0();
+  const dispatch = useDispatch();
+  const toDoLists = useSelector((state) => state.toDoLists);
+  const currentToDoListId = useSelector((state) => state.currentToDoListId);
+
+  const handleAddToDoList = () => {
+    dispatch(addTodoList());
+  };
+
+  const handleEditToDoList = (toDoList) => {
+    dispatch(editToDoList(toDoList));
+  };
+
+  const handleDeleteToDoList = (toDoListId) => {
+    dispatch(deleteToDoList(toDoListId));
+  };
+
+  const handleAddTask = (toDoListId, task) => {
+    dispatch(addTask(toDoListId, task));
+  };
+
+  const handleEditTask = (taskId, task) => {
+    dispatch(editTask(taskId, task));
+  };
+
+  const handleDeleteTask = (taskId) => {
+    dispatch(deleteTask(taskId));
+  };
+
+  const renderToDoLists = () => {
+    return toDoLists.map((toDoList) => {
+      return (
+        <div key={toDoList.id}>
+          <h1>{toDoList.title}</h1>
+          <ul>
+            {toDoList.tasks.map((task) => {
+              return (
+                <li key={task.id}>
+                  {task.title}
+                  <button onClick={() => handleEditTask(task.id)}>Edit</button>
+                  <button onClick={() => handleDeleteTask(task.id)}>Delete</button>
+                </li>
+              );
+            })}
+          </ul>
+          <button onClick={() => handleAddTask(toDoList.id)}>Add Task</button>
+        </div>
+      );
+    });
+  };
+
+  const renderToDoListForm = () => {
+    return (
+      <form onSubmit={handleAddToDoList}>
+        <input type="text" placeholder="To-Do List Title" />
+        <button type="submit">Add To-Do List</button>
+      </form>
+    );
+  };
+
+  if (!isAuthenticated) {
+    return <div>Please log in to access your to-do lists.</div>;
+  }
+
+  return (
+    <div>
+      <h1>To-Do List</h1>
+      {currentToDoListId ? renderToDoLists() : renderToDoListForm()}
+    </div>
+  );
+};
+
+export default App;
